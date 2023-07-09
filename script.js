@@ -1,50 +1,87 @@
-var targetDate
+// Function to create a countdown timer
+function createCountdownTimer() {
+  var countdownInput = document.createElement("div");
+  countdownInput.classList.add("countdown-input");
 
-function getDate() {
-  targetDateTemp = document.getElementById("my-date").value;
-  myTime = document.getElementById("my-time").value;
-  console.log(myTime)
+  var dateInput = document.createElement("input");
+  dateInput.type = "date";
+  dateInput.classList.add("date-input");
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+  var yyyy = today.getFullYear();
+  var minDate = yyyy + '-' + mm + '-' + dd;
+  dateInput.setAttribute("min", minDate);
 
-  targetDate = `${targetDateTemp} ${myTime}`
-  // Use the selectedDate for further processing
-  console.log(targetDate);
-  if (targetDateTemp && myTime) {
-    // Update the countdown immediately
-    updateCountdown();
-    // Update the countdown every second
-    setInterval(updateCountdown, 1000);
-  }
-  else {
-    // Display an error message or perform any other action
-    alert("Please fill out both date and time inputs.");
-  }
+
+
+  var timeInput = document.createElement("input");
+  timeInput.type = "time";
+  timeInput.classList.add("time-input");
+
+  var startButton = document.createElement("button");
+  startButton.innerText = "Start Countdown";
+  startButton.classList.add("start-button");
+  startButton.addEventListener("click", startCountdown);
+
+  var countdownOutput = document.createElement("p");
+  countdownOutput.classList.add("countdown-output");
+
+  countdownInput.appendChild(dateInput);
+  countdownInput.appendChild(timeInput);
+  countdownInput.appendChild(startButton);
+  countdownInput.appendChild(countdownOutput);
+
+  var countdownForm = document.getElementById("countdown-form");
+  countdownForm.appendChild(countdownInput);
 }
 
-// Function to update countdown
-function updateCountdown() {
-  var currentDate = new Date().getTime();
-  targetDate = new Date(targetDate).getTime();
+// Function to start the countdown for a specific input section
+function startCountdown(event) {
+  var countdownInput = event.target.parentNode;
+  var dateInput = countdownInput.querySelector(".date-input");
+  var timeInput = countdownInput.querySelector(".time-input");
+  var countdownOutput = countdownInput.querySelector(".countdown-output");
 
+  var targetDate = new Date(dateInput.value + "T" + timeInput.value).getTime();
+
+  // Clear any previous countdown interval
+  clearInterval(countdownInput.intervalId);
+
+  // Update the countdown immediately
+  updateCountdown(targetDate, countdownOutput);
+
+  // Update the countdown every second
+  countdownInput.intervalId = setInterval(function () {
+    updateCountdown(targetDate, countdownOutput);
+  }, 1000);
+}
+
+// Function to update the countdown
+function updateCountdown(targetDate, countdownOutput) {
+  var currentDate = new Date().getTime();
   var timeDifference = targetDate - currentDate;
-  console.log(timeDifference);
+
   if (timeDifference > 0) {
     var days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
     var hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     var minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
     var seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-    // Update the countdown element
-    document.getElementById("countdown").textContent = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
-  }
-  else {
-    document.getElementById("countdown").textContent = "Countdown Complete!";
+    countdownOutput.textContent = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+  } else {
+    countdownOutput.textContent = "Countdown Complete!";
   }
 }
 
-// Set the minimum date as today's date
-var today = new Date();
-var dd = String(today.getDate()).padStart(2, '0');
-var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
-var yyyy = today.getFullYear();
-var minDate = yyyy + '-' + mm + '-' + dd;
-document.getElementById("my-date").setAttribute("min", minDate);
+
+function getDate() {
+  var dateInput = document.getElementById("my-date");
+  var timeInput = document.getElementById("my-time");
+  var selectedDate = dateInput.value;
+  var selectedTime = timeInput.value;
+}
+
+// Add event listener to the "Add Timer" button
+var addTimerButton = document.getElementById("add-timer-button");
+addTimerButton.addEventListener("click", createCountdownTimer);
