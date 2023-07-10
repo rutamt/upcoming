@@ -1,7 +1,8 @@
+
+
 // List stored in localstorage that keeps track of timers
 var tempCountdowns = []
 var countdowns = localStorage.getItem('countdowns');
-
 // Function to create a countdown timer
 function createCountdownTimer(date = "", time = "", name = "") {
   var countdownInput = document.createElement("div");
@@ -9,6 +10,14 @@ function createCountdownTimer(date = "", time = "", name = "") {
   var countdownBox = document.createElement("div");
   countdownBox.classList.add("countdown-box");
   countdownBox.classList.add("countdown-timer");
+
+  var editButton = document.createElement("button");
+  editButton.innerText = "Edit Countdown";
+  editButton.classList.add("edit-button");
+  editButton.addEventListener("click", function () {
+    editCountdown(countdownInput);
+  });
+  countdownInput.appendChild(editButton);
 
   var nameInput = document.createElement("input");
   nameInput.type = "text";
@@ -64,6 +73,18 @@ function createCountdownTimer(date = "", time = "", name = "") {
 
   var countdownForm = document.getElementById("countdown-form");
   countdownForm.appendChild(countdownInput);
+}
+
+function editCountdown(countdownInput) {
+  var nameInput = countdownInput.querySelector(".timer-name");
+  var dateInput = countdownInput.querySelector(".date-input");
+  var timeInput = countdownInput.querySelector(".time-input");
+  var startButton = countdownInput.querySelector(".start-button");
+
+  nameInput.style.display = "block";
+  dateInput.style.display = "block";
+  timeInput.style.display = "block";
+  startButton.style.display = "block";
 }
 
 // Function to start the countdown for a specific input section
@@ -123,6 +144,21 @@ function updateCountdown(targetDate, countdownOutput, name, nameOut) {
   } else {
     countdownOutput.textContent = "Countdown Complete!";
 
+    // Trigger confetti
+    const canvas = document.getElementById('your_custom_canvas_id')
+    const jsConfetti = new JSConfetti(canvas);
+    jsConfetti.addConfetti();
+
+    // Play the notification sound
+    var notificationSound = document.getElementById("notificationSound");
+    notificationSound.play();
+
+    // Stop confetti and audio after 3 seconds (adjust the duration as needed)
+    setTimeout(function () {
+      jsConfetti.clearCanvas();
+      notificationSound.pause();
+      notificationSound.currentTime = 0;
+    }, 3000);
   }
 }
 
@@ -153,8 +189,21 @@ document.addEventListener("DOMContentLoaded", function () {
   if (DOMcountDowns != null) {
     tempCountdowns = DOMcountDowns;
     for (var i = 0; i < DOMcountDowns.length; i++) {
-      console.log(i);
       createCountdownTimer(DOMcountDowns[i][0], DOMcountDowns[i][1], DOMcountDowns[i][2]);
     }
+  }
+});
+
+
+// Clearing all timers
+var clearButton = document.getElementById("clear-timer-button");
+clearButton.addEventListener("click", function (e) { //e => event
+  if (!confirm("Do you really want to do this?")) {
+    e.preventDefault(); // ! => don't want to do this
+  } else {
+    //want to do this! => maybe do something about it?
+    localStorage.clear();
+    alert("Cleared all countdowns");
+    location.reload();
   }
 });
