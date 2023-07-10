@@ -1,171 +1,110 @@
-varcountdownTimers = [];
-document.addEventListener("DOMContentLoaded", function () {
+// List stored in localstorage that keeps track of timers
+var tempCountdowns = []
+var countdowns = localStorage.getItem('countdowns');
 
-  // Load countdown timers from local storage
-  function loadCountdownTimers() {
-    var savedCountdowns = localStorage.getItem("countdownTimers");
+// Function to create a countdown timer
+function createCountdownTimer() {
+  var countdownInput = document.createElement("div");
+  countdownInput.classList.add("countdown-input");
 
-    if (savedCountdowns) {
-      countdownTimers = JSON.parse(savedCountdowns);
+  var nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.classList.add("timer-name");
+  nameInput.placeholder = "Timer Name";
 
-      // Clear the countdown form
-      var countdownForm = document.getElementById("countdown-form");
-      countdownForm.innerHTML = "";
+  var dateInput = document.createElement("input");
+  dateInput.type = "date";
+  dateInput.classList.add("date-input");
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+  var yyyy = today.getFullYear();
+  var minDate = yyyy + '-' + mm + '-' + dd;
+  dateInput.setAttribute("min", minDate);
 
-      countdownTimers.forEach(function (countdown) {
-        createCountdownTimer(countdown.name, countdown.date, countdown.time);
-      });
-    }
-  }
+  var timeInput = document.createElement("input");
+  timeInput.type = "time";
+  timeInput.classList.add("time-input");
 
-  // Save countdown timers to local storage
-  function saveCountdownTimers() {
-    localStorage.setItem("countdownTimers", JSON.stringify(countdownTimers));
-  }
+  var startButton = document.createElement("button");
+  startButton.innerText = "Start Countdown";
+  startButton.classList.add("start-button");
+  startButton.addEventListener("click", startCountdown);
 
-  // Function to create a countdown timer
-  function createCountdownTimer(name = "", date = "", time = "") {
-    var countdownInput = document.createElement("div");
-    countdownInput.classList.add("countdown-input");
-    countdownInput.setAttribute("data-index", countdownTimers.length); // Assign unique index
+  var countdownOutput = document.createElement("h1");
+  countdownOutput.classList.add("countdown-output");
 
-    var nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.classList.add("timer-name");
-    nameInput.placeholder = "Timer Name";
-    nameInput.value = name;
+  var countdownName = document.createElement("p");
+  countdownName.classList.add("countdown-name");
 
-    var dateInput = document.createElement("input");
-    dateInput.type = "date";
-    dateInput.classList.add("date-input");
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
-    var yyyy = today.getFullYear();
-    var minDate = yyyy + '-' + mm + '-' + dd;
-    dateInput.setAttribute("min", minDate);
-    dateInput.value = date;
+  countdownInput.appendChild(nameInput);
+  countdownInput.appendChild(dateInput);
+  countdownInput.appendChild(timeInput);
+  countdownInput.appendChild(startButton);
+  countdownInput.appendChild(countdownOutput);
+  countdownInput.appendChild(countdownName);
 
-    var timeInput = document.createElement("input");
-    timeInput.type = "time";
-    timeInput.classList.add("time-input");
-    timeInput.value = time;
+  var countdownForm = document.getElementById("countdown-form");
+  countdownForm.appendChild(countdownInput);
+}
 
-    var saveButton = document.createElement("button");
-    saveButton.innerText = "Start Timer";
-    saveButton.classList.add("save-button");
-    saveButton.addEventListener("click", function () {
-      saveTimer(countdownInput);
-      startCountdown(countdownInput);
-    });
+// Function to start the countdown for a specific input section
+function startCountdown(event) {
+  var countdownInput = event.target.parentNode;
+  var nameInput = countdownInput.querySelector(".timer-name").value;
+  var dateInput = countdownInput.querySelector(".date-input").value;
+  var timeInput = countdownInput.querySelector(".time-input").value;
+  var nameOutput = countdownInput.querySelector(".countdown-name");
+  var countdownOutput = countdownInput.querySelector(".countdown-output");
 
-    var closeButton = document.createElement("button");
-    closeButton.innerText = "Close";
-    closeButton.classList.add("close-button");
-    closeButton.addEventListener("click", function () {
-      closeCountdown(countdownInput);
-    });
-
-    countdownInput.appendChild(closeButton);
-    var countdownOutput = document.createElement("p");
-    countdownOutput.classList.add("countdown-output");
-
-    countdownInput.appendChild(nameInput);
-    countdownInput.appendChild(dateInput);
-    countdownInput.appendChild(timeInput);
-    countdownInput.appendChild(saveButton);
-    countdownInput.appendChild(countdownOutput);
-
-    var countdownForm = document.getElementById("countdown-form");
-    countdownForm.appendChild(countdownInput);
-
-    // Store the countdown in the array
-    countdownTimers.push({
-      name: nameInput.value,
-      date: dateInput.value,
-      time: timeInput.value,
-      countdownOutput: countdownOutput,
-      intervalId: null
-    });
-  }
-
-  // Save the countdown timer in local storage
-  function saveTimer(countdownInput) {
-    var nameInput = countdownInput.querySelector(".timer-name");
-    var dateInput = countdownInput.querySelector(".date-input");
-    var timeInput = countdownInput.querySelector(".time-input");
-
-    // Update the countdown timer in the array
-    var index = Array.from(countdownInput.parentElement.children).indexOf(countdownInput);
-    countdownTimers[index].name = nameInput.value;
-    countdownTimers[index].date = dateInput.value;
-    countdownTimers[index].time = timeInput.value;
-
-    // Save countdown timers to local storage
-    saveCountdownTimers();
-  }
-
-  // Function to start the countdown for a specific input section
-  function startCountdown(countdownInput) {
-    var nameInput = countdownInput.querySelector(".timer-name").value;
-    var dateInput = countdownInput.querySelector(".date-input");
-    var timeInput = countdownInput.querySelector(".time-input");
-    var countdownOutput = countdownInput.querySelector(".countdown-output");
-
-    var targetDate = new Date(dateInput.value + "T" + timeInput.value).getTime();
+  if (nameInput && dateInput && timeInput) {
+    var targetDate = new Date(dateInput + "T" + timeInput).getTime();
 
     // Clear any previous countdown interval
     clearInterval(countdownInput.intervalId);
 
+    // Appending the countdown to the array of countdowns
+    tempCountdowns.push([targetDate, nameInput]);
+
+    // Update localstorage
+    updateLocalStorage();
+
     // Update the countdown immediately
-    updateCountdown(targetDate, countdownOutput, nameInput);
+    updateCountdown(targetDate, countdownOutput, nameInput, nameOutput);
 
     // Update the countdown every second
     countdownInput.intervalId = setInterval(function () {
-      updateCountdown(targetDate, countdownOutput, nameInput);
+      updateCountdown(targetDate, countdownOutput, nameInput, nameOutput);
     }, 1000);
   }
-
-
-  // Function to update the countdown  
-  function updateCountdown(targetDate, countdownOutput, name) {
-    var currentDate = new Date().getTime();
-    var timeDifference = targetDate - currentDate;
-
-    if (timeDifference > 0) {
-      var days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-      var hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      var minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-      var seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-
-      countdownOutput.textContent = name + " " + days + "d " + hours + "h " + minutes + "m " + seconds + "s";
-    } else {
-      countdownOutput.textContent = "Countdown Complete!";
-    }
+  else {
+    alert("Please fill in all the values")
   }
 
-  // Load countdown timers from local storage
-  loadCountdownTimers();
+}
 
-  // Add event listener to the "Add Timer" button
-  var addTimerButton = document.getElementById("add-timer-button");
-  addTimerButton.addEventListener("click", function () {
-    createCountdownTimer();
-  });
+// Function to update the countdown
+function updateCountdown(targetDate, countdownOutput, name, nameOut) {
+  var currentDate = new Date().getTime();
+  var timeDifference = targetDate - currentDate;
 
+  if (timeDifference > 0) {
+    var days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-  function closeCountdown(countdownInput) {
-    var index = Array.from(countdownInput.parentNode.children).indexOf(countdownInput);
-    countdownInput.parentNode.removeChild(countdownInput);
-    countdownTimers.splice(index, 1);
+    nameOut.innerText = name;
+    countdownOutput.textContent = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+  } else {
+    countdownOutput.textContent = "Countdown Complete!";
 
-    // Save updated countdown timers to local storage
-    saveCountdownTimers();
   }
+}
 
-  // Function to save countdown timers to local storage
-  function saveCountdownTimers() {
-    localStorage.setItem("countdownTimers", JSON.stringify(countdownTimers));
-  }
-
-});
+function updateLocalStorage() {
+  localStorage.setItem('countdowns', JSON.stringify(tempCountdowns));
+}
+// Add event listener to the "Add Timer" button
+var addTimerButton = document.getElementById("add-timer-button");
+addTimerButton.addEventListener("click", createCountdownTimer);

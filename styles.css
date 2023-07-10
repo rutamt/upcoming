@@ -1,0 +1,48 @@
+.head {
+    background-color: blue;
+}
+
+.countdown-name {
+    text-align: center;
+    font-size: 1000px;
+    font-family: 'Arial Narrow Bold';
+    font-weight: bold;
+}
+
+#add-timer-button {
+    width: 100px;
+    height: 40px;
+    background: #cebeb9;
+    border: 2px solid #cebeb9;
+    margin-top: 13px;
+    color: black;
+    font-family: Georgia;
+    font-size: 15px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    cursor: pointer;
+}
+
+#countdown-form {
+    background: #cebeb9;
+    border: 2px solid #cebeb9;
+    margin-top: 13px;
+    color: black;
+    font-family: Georgia;
+    font-size: 15px;
+    padding-bottom: 1px white;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.countdown-output {
+    color: white;
+    text-align: center;
+    size: 10px;
+    font-family: Georgia;
+    font-weight: bold;
+}
