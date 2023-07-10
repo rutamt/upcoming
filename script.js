@@ -8,6 +8,7 @@ function createCountdownTimer(date = "", time = "", name = "") {
   countdownInput.classList.add("countdown-input");
   var countdownBox = document.createElement("div");
   countdownBox.classList.add("countdown-box");
+  countdownBox.classList.add("countdown-timer");
 
   var nameInput = document.createElement("input");
   nameInput.type = "text";
@@ -36,6 +37,16 @@ function createCountdownTimer(date = "", time = "", name = "") {
   startButton.classList.add("start-button");
   startButton.addEventListener("click", startCountdown);
 
+  var deleteButton = document.createElement("button");
+  deleteButton.innerText = "Delete";
+  deleteButton.classList.add("delete-button");
+  deleteButton.addEventListener("click", function () {
+    deleteCountdown(countdownInput);
+  });
+
+  if (time && date && name) {
+    startCountdown;
+  }
   var countdownOutput = document.createElement("h1");
   countdownOutput.classList.add("countdown-output");
 
@@ -49,6 +60,7 @@ function createCountdownTimer(date = "", time = "", name = "") {
   countdownInput.appendChild(countdownOutput);
   countdownInput.appendChild(countdownName);
   countdownBox.appendChild(countdownInput);
+  countdownInput.appendChild(deleteButton);
 
   var countdownForm = document.getElementById("countdown-form");
   countdownForm.appendChild(countdownInput);
@@ -75,6 +87,12 @@ function startCountdown(event) {
     // Update localstorage
     updateLocalStorage();
 
+    // Hide the inputs
+    countdownInput.querySelector(".timer-name").style.display = "none";
+    countdownInput.querySelector(".date-input").style.display = "none";
+    countdownInput.querySelector(".time-input").style.display = "none";
+    countdownInput.querySelector(".start-button").style.display = "none";
+
     // Update the countdown immediately
     updateCountdown(targetDate, countdownOutput, nameInput, nameOutput);
 
@@ -82,12 +100,12 @@ function startCountdown(event) {
     countdownInput.intervalId = setInterval(function () {
       updateCountdown(targetDate, countdownOutput, nameInput, nameOutput);
     }, 1000);
+  } else {
+    alert("Please fill in all the values");
   }
-  else {
-    alert("Please fill in all the values")
-  }
-
 }
+
+
 
 // Function to update the countdown
 function updateCountdown(targetDate, countdownOutput, name, nameOut) {
@@ -108,6 +126,20 @@ function updateCountdown(targetDate, countdownOutput, name, nameOut) {
   }
 }
 
+function deleteCountdown(countdownInput) {
+  var countdownForm = document.getElementById("countdown-form");
+  var index = Array.from(countdownForm.children).indexOf(countdownInput);
+
+  // Remove the countdown from the tempCountdowns array
+  tempCountdowns.splice(index, 1);
+
+  // Update local storage
+  updateLocalStorage();
+
+  // Remove the HTML element
+  countdownForm.removeChild(countdownInput);
+}
+
 function updateLocalStorage() {
   localStorage.setItem('countdowns', JSON.stringify(tempCountdowns));
 }
@@ -119,7 +151,7 @@ addTimerButton.addEventListener("click", createCountdownTimer);
 document.addEventListener("DOMContentLoaded", function () {
   var DOMcountDowns = JSON.parse(localStorage.getItem("countdowns"));
   if (DOMcountDowns != null) {
-    console.log(DOMcountDowns);
+    tempCountdowns = DOMcountDowns;
     for (var i = 0; i < DOMcountDowns.length; i++) {
       console.log(i);
       createCountdownTimer(DOMcountDowns[i][0], DOMcountDowns[i][1], DOMcountDowns[i][2]);
