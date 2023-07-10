@@ -5,19 +5,13 @@ var tempCountdowns = []
 var countdowns = localStorage.getItem('countdowns');
 // Function to create a countdown timer
 function createCountdownTimer(date = "", time = "", name = "") {
+
   var countdownInput = document.createElement("div");
   countdownInput.classList.add("countdown-input");
   var countdownBox = document.createElement("div");
   countdownBox.classList.add("countdown-box");
   countdownBox.classList.add("countdown-timer");
 
-  var editButton = document.createElement("button");
-  editButton.innerText = "Edit Countdown";
-  editButton.classList.add("edit-button");
-  editButton.addEventListener("click", function () {
-    editCountdown(countdownInput);
-  });
-  countdownInput.appendChild(editButton);
 
   var nameInput = document.createElement("input");
   nameInput.type = "text";
@@ -53,6 +47,8 @@ function createCountdownTimer(date = "", time = "", name = "") {
     deleteCountdown(countdownInput);
   });
 
+  countdownInput.appendChild(deleteButton);
+
   if (time && date && name) {
     startCountdown;
   }
@@ -73,18 +69,6 @@ function createCountdownTimer(date = "", time = "", name = "") {
 
   var countdownForm = document.getElementById("countdown-form");
   countdownForm.appendChild(countdownInput);
-}
-
-function editCountdown(countdownInput) {
-  var nameInput = countdownInput.querySelector(".timer-name");
-  var dateInput = countdownInput.querySelector(".date-input");
-  var timeInput = countdownInput.querySelector(".time-input");
-  var startButton = countdownInput.querySelector(".start-button");
-
-  nameInput.style.display = "block";
-  dateInput.style.display = "block";
-  timeInput.style.display = "block";
-  startButton.style.display = "block";
 }
 
 // Function to start the countdown for a specific input section
@@ -114,22 +98,21 @@ function startCountdown(event) {
     countdownInput.querySelector(".time-input").style.display = "none";
     countdownInput.querySelector(".start-button").style.display = "none";
 
+
     // Update the countdown immediately
-    updateCountdown(targetDate, countdownOutput, nameInput, nameOutput);
+    updateCountdown(targetDate, countdownOutput, nameInput, nameOutput, countdownInput);
 
     // Update the countdown every second
     countdownInput.intervalId = setInterval(function () {
-      updateCountdown(targetDate, countdownOutput, nameInput, nameOutput);
+      updateCountdown(targetDate, countdownOutput, nameInput, nameOutput, countdownInput);
     }, 1000);
   } else {
     alert("Please fill in all the values");
   }
 }
 
-
-
 // Function to update the countdown
-function updateCountdown(targetDate, countdownOutput, name, nameOut) {
+function updateCountdown(targetDate, countdownOutput, name, nameOut, countdownInput) {
   var currentDate = new Date().getTime();
   var timeDifference = targetDate - currentDate;
 
@@ -144,23 +127,29 @@ function updateCountdown(targetDate, countdownOutput, name, nameOut) {
   } else {
     countdownOutput.textContent = "Countdown Complete!";
 
+    // Clear the interval
+    clearInterval(countdownInput.intervalId);
+
     // Trigger confetti
-    const canvas = document.getElementById('your_custom_canvas_id')
-    const jsConfetti = new JSConfetti(canvas);
-    jsConfetti.addConfetti();
+    const canvas = document.getElementById('confetti-canvas')
+    const jsConfetti = new JSConfetti({ canvas })
 
-    // Play the notification sound
-    var notificationSound = document.getElementById("notificationSound");
-    notificationSound.play();
-
-    // Stop confetti and audio after 3 seconds (adjust the duration as needed)
     setTimeout(function () {
-      jsConfetti.clearCanvas();
-      notificationSound.pause();
-      notificationSound.currentTime = 0;
-    }, 3000);
+      notificationSound.play();
+      jsConfetti.addConfetti({
+        confettiRadius: 6,
+        confettiNumber: 500,
+      })
+
+      setTimeout(function () {
+        jsConfetti.clearCanvas();
+        notificationSound.pause();
+        notificationSound.currentTime = 0;
+      }, 2500);
+    }, 0);
   }
 }
+
 
 function deleteCountdown(countdownInput) {
   var countdownForm = document.getElementById("countdown-form");
