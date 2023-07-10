@@ -3,14 +3,17 @@ var tempCountdowns = []
 var countdowns = localStorage.getItem('countdowns');
 
 // Function to create a countdown timer
-function createCountdownTimer() {
+function createCountdownTimer(date = "", time = "", name = "") {
   var countdownInput = document.createElement("div");
   countdownInput.classList.add("countdown-input");
+  var countdownBox = document.createElement("div");
+  countdownBox.classList.add("countdown-box");
 
   var nameInput = document.createElement("input");
   nameInput.type = "text";
   nameInput.classList.add("timer-name");
   nameInput.placeholder = "Timer Name";
+  if (name) { nameInput.value = name; }
 
   var dateInput = document.createElement("input");
   dateInput.type = "date";
@@ -21,10 +24,12 @@ function createCountdownTimer() {
   var yyyy = today.getFullYear();
   var minDate = yyyy + '-' + mm + '-' + dd;
   dateInput.setAttribute("min", minDate);
+  if (date) { dateInput.value = date; }
 
   var timeInput = document.createElement("input");
   timeInput.type = "time";
   timeInput.classList.add("time-input");
+  if (time) { timeInput.value = time; }
 
   var startButton = document.createElement("button");
   startButton.innerText = "Start Countdown";
@@ -43,6 +48,7 @@ function createCountdownTimer() {
   countdownInput.appendChild(startButton);
   countdownInput.appendChild(countdownOutput);
   countdownInput.appendChild(countdownName);
+  countdownBox.appendChild(countdownInput);
 
   var countdownForm = document.getElementById("countdown-form");
   countdownForm.appendChild(countdownInput);
@@ -64,7 +70,7 @@ function startCountdown(event) {
     clearInterval(countdownInput.intervalId);
 
     // Appending the countdown to the array of countdowns
-    tempCountdowns.push([targetDate, nameInput]);
+    tempCountdowns.push([dateInput, timeInput, nameInput]);
 
     // Update localstorage
     updateLocalStorage();
@@ -108,3 +114,15 @@ function updateLocalStorage() {
 // Add event listener to the "Add Timer" button
 var addTimerButton = document.getElementById("add-timer-button");
 addTimerButton.addEventListener("click", createCountdownTimer);
+
+// Content to do when the page loads 
+document.addEventListener("DOMContentLoaded", function () {
+  var DOMcountDowns = JSON.parse(localStorage.getItem("countdowns"));
+  if (DOMcountDowns != null) {
+    console.log(DOMcountDowns);
+    for (var i = 0; i < DOMcountDowns.length; i++) {
+      console.log(i);
+      createCountdownTimer(DOMcountDowns[i][0], DOMcountDowns[i][1], DOMcountDowns[i][2]);
+    }
+  }
+});
