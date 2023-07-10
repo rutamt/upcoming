@@ -33,7 +33,7 @@ To use the countdown timer application, simply open the `index.html` file in you
 
 ## Collaborator
 
-This project was developed in collaboration with my brother OmTasg. He contributed to the implementation and design of the countdown timer.
+This project was developed in collaboration with my brother [OmTasg](https://github.com/OmTasg). He contributed to the implementation and design of the countdown timer.
 
 ## Credits
 
